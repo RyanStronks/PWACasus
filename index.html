@@ -43,7 +43,6 @@
         if (gamesList) {
           try {
             const games = await fetchGames();
-            console.log('Fetched games:', games);
 
             if (Array.isArray(games) && games.length > 0) {
               gamesList.innerHTML = games
