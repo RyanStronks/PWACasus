@@ -399,5 +399,60 @@
       <p class="absolute bottom-72 left-0 right-0 text-xs text-zinc-300 text-center pointer-events-none">
         Click outside to close
       </p>
+
+        <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Search dialog
+        const dialogEl = document.getElementById('search-dialog');
+        if (window.mdc && mdc.dialog && dialogEl) {
+          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+          const searchTextField = new mdc.textField.MDCTextField(
+            document.querySelector('.mdc-text-field')
+          );
+
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+              }, 200);
+            });
+          }
+        }
+
+        // Drawer (menu)
+        const drawerEl = document.getElementById('app-drawer');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+          const menuBtn = document.querySelector(
+            '.mdc-top-app-bar__navigation-icon'
+          );
+          const listEl = drawerEl.querySelector('.mdc-list');
+          const mainContentEl = document.querySelector('.main-content');
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
+      });
+    </script>
   </body>
 </html>
