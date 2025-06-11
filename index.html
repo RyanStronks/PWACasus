@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="PWA Casus" />
+    <meta name="description" content="Game API" />
     <meta name="msapplication-TileColor" content="#6200ee" />
     <meta name="theme-color" content="#6200ee" />
     <link rel="manifest" href="./webmanifest.json" />
@@ -20,7 +20,7 @@
       sizes="180x180"
       href="./assets/apple-touch-icon.png"
     />
-    <meta name="apple-mobile-web-app-title" content="PWA Casus" />
+    <meta name="apple-mobile-web-app-title" content="Game API" />
     <title>Home</title>
     <link
       rel="stylesheet"
@@ -35,6 +35,75 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script defer src="./init.js"></script>
+    <script type="module">
+      import { fetchGames } from './api.js';
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        const gamesList = document.getElementById('games-list');
+        if (gamesList) {
+          try {
+            const games = await fetchGames();
+            if (Array.isArray(games) && games.length > 0) {
+              gamesList.innerHTML = games
+                .map(
+                  (game) => `
+                    <div class="mb-4 p-4 rounded shadow bg-white">
+                      <h2 class="text-lg font-bold">${
+                        game.name || 'No Name'
+                      }</h2>
+                      <p>ID: ${game.id || 'N/A'}</p>
+                    </div>
+                  `
+                )
+                .join('');
+            } else {
+              gamesList.textContent = 'No games found.';
+            }
+          } catch (err) {
+            gamesList.textContent = 'Failed to load games.';
+          }
+        }
+
+        const dialogEl = document.getElementById('search-dialog');
+        const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+        const searchTextField = new mdc.textField.MDCTextField(
+          document.querySelector('.mdc-text-field')
+        );
+
+        const searchBtn = document.getElementById('search-button');
+        searchBtn.addEventListener('click', function () {
+          searchDialog.open();
+          setTimeout(() => {
+            document.getElementById('search-input').focus();
+          }, 200);
+        });
+
+        const drawerEl = document.getElementById('app-drawer');
+        const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+        const menuBtn = document.querySelector(
+          '.mdc-top-app-bar__navigation-icon'
+        );
+        const listEl = drawerEl.querySelector('.mdc-list');
+        const mainContentEl = document.querySelector('.main-content');
+
+        menuBtn.addEventListener('click', () => {
+          drawer.open = true;
+        });
+
+        listEl.addEventListener('click', (event) => {
+          drawer.open = false;
+        });
+
+        drawerEl.addEventListener('MDCDrawer:closed', () => {
+          const focusable = mainContentEl.querySelector(
+            'input, button, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable) focusable.focus();
+          else mainContentEl.focus();
+        });
+      });
+    </script>
   </head>
 
   <body>
@@ -49,7 +118,7 @@
           >
             menu
           </button>
-          <p class="mdc-top-app-bar__title">PWA Casus</p>
+          <p class="mdc-top-app-bar__title">Game API</p>
         </section>
         <section
           class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
@@ -145,53 +214,8 @@
     </aside>
     <div class="mdc-drawer-scrim"></div>
 
-    <script>
-      if (!document.querySelector('script[src*="tailwind"]')) {
-        const tw = document.createElement('script');
-        tw.src = 'https://cdn.tailwindcss.com';
-        document.head.appendChild(tw);
-      }
-
-      document.addEventListener('DOMContentLoaded', function () {
-        const dialogEl = document.getElementById('search-dialog');
-        const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
-
-        const searchTextField = new mdc.textField.MDCTextField(
-          document.querySelector('.mdc-text-field')
-        );
-
-        const searchBtn = document.getElementById('search-button');
-        searchBtn.addEventListener('click', function () {
-          searchDialog.open();
-          setTimeout(() => {
-            document.getElementById('search-input').focus();
-          }, 200);
-        });
-
-        const drawerEl = document.getElementById('app-drawer');
-        const drawer = new mdc.drawer.MDCDrawer(drawerEl);
-        const menuBtn = document.querySelector(
-          '.mdc-top-app-bar__navigation-icon'
-        );
-        const listEl = drawerEl.querySelector('.mdc-list');
-        const mainContentEl = document.querySelector('.main-content');
-
-        menuBtn.addEventListener('click', () => {
-          drawer.open = true;
-        });
-
-        listEl.addEventListener('click', (event) => {
-          drawer.open = false;
-        });
-
-        drawerEl.addEventListener('MDCDrawer:closed', () => {
-          const focusable = mainContentEl.querySelector(
-            'input, button, [tabindex]:not([tabindex="-1"])'
-          );
-          if (focusable) focusable.focus();
-          else mainContentEl.focus();
-        });
-      });
-    </script>
+    <main class="main-content" tabindex="0">
+      <div id="games-list" class="p-4"></div>
+    </main>
   </body>
 </html>
