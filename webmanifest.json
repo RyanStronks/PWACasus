@@ -4,8 +4,8 @@
   "description": "A simple web application to interact with a game API.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#6200ee",
+  "background_color": "#1a0022",
+  "theme_color": "#923CB5",
   "orientation": "portrait",
   "scope": ".",
   "icons": [

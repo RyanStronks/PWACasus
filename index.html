@@ -48,15 +48,27 @@
               gamesList.innerHTML = games
                 .map(
                   (game) => `
-              <div class="mb-4 p-4 rounded shadow bg-white">
-                <h2 class="text-lg font-bold">${game.name || 'No Name'}</h2>
-                <p>ID: ${game.id || 'N/A'}</p>
-                <p>${game.description || ''}</p>
-                <img src="https://ryanstronks.gc-webhosting.nl/api/storage/${game.image_path.replace(
-                  /\\/g,
-                  ''
-                )}" alt="${game.name}" style="max-width:150px;"/>
+           <div class="mb-6 p-6 rounded-xl shadow-lg bg-white/80 dark:bg-black/60 border border-purple-200 dark:border-purple-800 transition-colors">
+              <h2 class="text-3xl font-extrabold mb-2 text-center text-purple-700 dark:text-purple-400 tracking-tight">
+                ${game.name || 'No Name'}
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">ID: ${
+                game.id || 'N/A'
+              }</p>
+              <p class="mb-3 text-gray-800 dark:text-gray-200">${
+                game.description || ''
+              }</p>
+              <div class="flex justify-center">
+                <img 
+                  src="https://ryanstronks.gc-webhosting.nl/api/storage/${game.image_path.replace(
+                    /\\/g,
+                    ''
+                  )}" 
+                  alt="${game.name}" 
+                  class="max-w-[150px] rounded shadow-md border border-purple-100 dark:border-purple-700 bg-white/60 dark:bg-black/40"
+                />
               </div>
+            </div>
             `
                 )
                 .join('');
@@ -219,7 +231,10 @@
     </aside>
     <div class="mdc-drawer-scrim"></div>
 
-    <main class="main-content" tabindex="0">
+    <main
+      class="main-content min-h-screen bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300"
+      tabindex="0"
+    >
       <div id="games-list" class="p-4"></div>
     </main>
   </body>
