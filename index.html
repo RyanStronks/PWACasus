@@ -36,89 +36,144 @@
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script defer src="./init.js"></script>
     <script type="module">
-      import { fetchGames } from './api.js';
+      import {
+        fetchGames,
+        createGame,
+        deleteGame,
+        uploadImage,
+        getGameImageUrl,
+      } from './api.js';
 
-      document.addEventListener('DOMContentLoaded', async function () {
-        const gamesList = document.getElementById('games-list');
-        if (gamesList) {
-          try {
-            const games = await fetchGames();
+      let games = [];
+      let gameToDelete = null;
 
-            if (Array.isArray(games) && games.length > 0) {
-              gamesList.innerHTML = games
-                .map(
-                  (game) => `
-           <div class="mb-6 p-6 rounded-xl shadow-lg bg-white/80 dark:bg-black/60 border border-purple-200 dark:border-purple-800 transition-colors">
-              <h2 class="text-3xl font-extrabold mb-2 text-center text-purple-700 dark:text-purple-400 tracking-tight">
-                ${game.name || 'No Name'}
-              </h2>
-              <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">ID: ${
-                game.id || 'N/A'
-              }</p>
-              <p class="mb-3 text-gray-800 dark:text-gray-200">${
-                game.description || ''
-              }</p>
-              <div class="flex justify-center">
-                <img 
-                  src="https://ryanstronks.gc-webhosting.nl/api/storage/${game.image_path.replace(
-                    /\\/g,
-                    ''
-                  )}" 
+      async function loadGames() {
+        try {
+          games = await fetchGames();
+          renderGames();
+        } catch {
+          document.getElementById('games-list').innerHTML =
+            '<li class="text-red-400">Failed to load games.</li>';
+        }
+      }
+
+      function renderGames() {
+        const list = document.getElementById('games-list');
+        if (!games.length) {
+          list.innerHTML = '<li class="text-zinc-400">No games found.</li>';
+          return;
+        }
+        list.innerHTML = games
+          .map(
+            (game) => `
+      <li class="p-4 rounded-lg bg-[#1e293b] hover:bg-[#334155] transition-colors border border-[#22304a]">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-purple-700 dark:text-purple-400 cursor-pointer hover:underline game-link" data-id="${
+              game.id
+            }">
+              ${game.name}
+            </span>
+            <span class="ml-2 text-zinc-400">(${game.description})</span>
+            ${
+              game.image_path
+                ? `
+              <div class="mt-2">
+                <img src="${getGameImageUrl(game.image_path)}" 
                   alt="${game.name}" 
-                  class="max-w-[150px] rounded shadow-md border border-purple-100 dark:border-purple-700 bg-white/60 dark:bg-black/40"
+                  class="h-16 w-auto rounded object-cover cursor-pointer game-image"
+                  data-img="${getGameImageUrl(game.image_path)}"
+                  data-name="${game.name}"
                 />
               </div>
-            </div>
             `
-                )
-                .join('');
-            } else {
-              gamesList.textContent = 'No games found.';
+                : ''
             }
+          </div>
+          <div>
+            <span class="material-icons cursor-pointer text-red-400 hover:text-red-600 delete-btn" data-id="${
+              game.id
+            }" data-name="${game.name}">
+              delete
+            </span>
+          </div>
+        </div>
+      </li>
+    `
+          )
+          .join('');
+      }
+
+      function showModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+      }
+      function hideModal(id) {
+        document.getElementById(id).classList.add('hidden');
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('open-create-modal').onclick = () =>
+          showModal('create-modal');
+        document.getElementById('cancel-create').onclick = () =>
+          hideModal('create-modal');
+        document.getElementById('create-form').onsubmit = async function (e) {
+          e.preventDefault();
+          const form = e.target;
+          const name = form.name.value.trim();
+          const description = form.description.value.trim();
+          const image = form.image.files[0];
+
+          document.getElementById('create-error').classList.add('hidden');
+          try {
+            let imagePath = '';
+            if (image) {
+              const data = await uploadImage(image);
+              imagePath = data.path || '';
+            }
+            await createGame({ name, description, image_path: imagePath });
+            hideModal('create-modal');
+            form.reset();
+            await loadGames();
           } catch (err) {
-            gamesList.textContent = 'Failed to load games.';
-            console.error(err);
+            const errDiv = document.getElementById('create-error');
+            errDiv.textContent = err.message || 'Failed to create game.';
+            errDiv.classList.remove('hidden');
           }
-        }
+        };
 
-        const dialogEl = document.getElementById('search-dialog');
-        const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
-
-        const searchTextField = new mdc.textField.MDCTextField(
-          document.querySelector('.mdc-text-field')
-        );
-
-        const searchBtn = document.getElementById('search-button');
-        searchBtn.addEventListener('click', function () {
-          searchDialog.open();
-          setTimeout(() => {
-            document.getElementById('search-input').focus();
-          }, 200);
+        document.addEventListener('click', function (e) {
+          if (e.target.classList.contains('delete-btn')) {
+            gameToDelete = games.find((g) => g.id == e.target.dataset.id);
+            document.getElementById('delete-game-name').textContent =
+              gameToDelete.name;
+            showModal('delete-modal');
+          }
         });
+        document.getElementById('cancel-delete').onclick = () =>
+          hideModal('delete-modal');
+        document.getElementById('confirm-delete').onclick = async function () {
+          if (!gameToDelete) return;
+          try {
+            await deleteGame(gameToDelete.id);
+            hideModal('delete-modal');
+            await loadGames();
+          } catch {
+            hideModal('delete-modal');
+          }
+        };
 
-        const drawerEl = document.getElementById('app-drawer');
-        const drawer = new mdc.drawer.MDCDrawer(drawerEl);
-        const menuBtn = document.querySelector(
-          '.mdc-top-app-bar__navigation-icon'
-        );
-        const listEl = drawerEl.querySelector('.mdc-list');
-        const mainContentEl = document.querySelector('.main-content');
-
-        menuBtn.addEventListener('click', () => {
-          drawer.open = true;
+        document.addEventListener('click', function (e) {
+          if (e.target.classList.contains('game-image')) {
+            document.getElementById('modal-image').src = e.target.dataset.img;
+            document.getElementById('modal-image').alt = e.target.dataset.name;
+            showModal('image-modal');
+          }
         });
+        document.getElementById('image-modal').onclick = function (e) {
+          if (e.target.id === 'image-modal') hideModal('image-modal');
+        };
 
-        listEl.addEventListener('click', (event) => {
-          drawer.open = false;
-        });
-
-        drawerEl.addEventListener('MDCDrawer:closed', () => {
-          const focusable = mainContentEl.querySelector(
-            'input, button, [tabindex]:not([tabindex="-1"])'
-          );
-          if (focusable) focusable.focus();
-          else mainContentEl.focus();
-        });
+        loadGames();
       });
     </script>
   </head>
@@ -235,7 +290,116 @@
       class="main-content min-h-screen bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300"
       tabindex="0"
     >
-      <div id="games-list" class="p-4"></div>
+      <div
+        class="max-w-2xl mx-auto p-8 rounded-xl shadow-lg bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a192f] text-zinc-100 mt-8"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-3xl font-bold text-purple-900 dark:text-purple-600">
+            Games
+          </h1>
+          <button
+            id="open-create-modal"
+            class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer"
+          >
+            + Create Game
+          </button>
+        </div>
+        <ul id="games-list" class="space-y-4"></ul>
+      </div>
     </main>
+
+    <!-- Create Game Modal -->
+    <div
+      id="create-modal"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
+    >
+      <div
+        class="bg-[#1e293b] p-6 rounded-lg shadow-lg text-center w-full max-w-md"
+      >
+        <h2 class="text-xl font-bold text-purple-900 dark:text-purple-600 mb-2">
+          Create Game
+        </h2>
+        <div id="create-error" class="mb-2 text-red-400 hidden"></div>
+        <form id="create-form" class="space-y-4">
+          <input
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            placeholder="Name"
+            name="name"
+            required
+          />
+          <input
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            placeholder="Description"
+            name="description"
+            required
+          />
+          <input
+            type="file"
+            accept="image/*"
+            name="image"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+          />
+          <div class="flex justify-center gap-4 mt-4">
+            <button
+              type="submit"
+              class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer"
+            >
+              Create
+            </button>
+            <button
+              type="button"
+              id="cancel-create"
+              class="px-4 py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div
+      id="delete-modal"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
+    >
+      <div class="bg-[#1e293b] p-6 rounded-lg shadow-lg text-center">
+        <h2 class="text-xl font-bold mb-4 text-blue-200">Are you sure?</h2>
+        <p class="mb-6 text-zinc-300">
+          Do you really want to delete
+          <span id="delete-game-name" class="font-semibold"></span>?
+        </p>
+        <div class="flex justify-center gap-4">
+          <button
+            id="confirm-delete"
+            class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+          >
+            Yes, Delete
+          </button>
+          <button
+            id="cancel-delete"
+            class="px-4 py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div
+      id="image-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm hidden"
+    >
+      <div class="relative p-4 flex flex-col items-center h-2/3 w-2/3">
+        <img
+          id="modal-image"
+          class="h-full w-auto max-w-full max-h-full rounded mb-4 object-contain"
+        />
+        <div class="text-xs text-zinc-400 text-center">
+          Click outside to close
+        </div>
+      </div>
+    </div>
   </body>
 </html>
