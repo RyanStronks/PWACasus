@@ -287,19 +287,19 @@
     <div class="mdc-drawer-scrim"></div>
 
     <main
-      class="main-content min-h-screen bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300"
+      class="main-content min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300 px-2"
       tabindex="0"
     >
       <div
-        class="max-w-2xl mx-auto p-8 rounded-xl shadow-lg bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a192f] text-zinc-100 mt-8"
+        class="w-full max-w-2xl md:max-w-3xl mx-auto p-4 md:p-10 rounded-xl shadow-lg bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a192f] text-zinc-100 mt-8 md:mt-16"
       >
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-3xl font-bold text-purple-900 dark:text-purple-600">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+          <h1 class="text-3xl font-bold text-purple-900 dark:text-purple-600 text-center md:text-left">
             Games
           </h1>
           <button
             id="open-create-modal"
-            class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer"
+            class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer w-full md:w-auto"
           >
             + Create Game
           </button>
@@ -308,7 +308,6 @@
       </div>
     </main>
 
-    <!-- Create Game Modal -->
     <div
       id="create-modal"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
@@ -358,7 +357,6 @@
       </div>
     </div>
 
-    <!-- Delete Modal -->
     <div
       id="delete-modal"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
@@ -386,7 +384,6 @@
       </div>
     </div>
 
-    <!-- Image Modal -->
     <div
       id="image-modal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden"
@@ -402,7 +399,6 @@
 
         <script>
       document.addEventListener('DOMContentLoaded', function () {
-        // Search dialog
         const dialogEl = document.getElementById('search-dialog');
         if (window.mdc && mdc.dialog && dialogEl) {
           const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
@@ -422,7 +418,6 @@
           }
         }
 
-        // Drawer (menu)
         const drawerEl = document.getElementById('app-drawer');
         if (window.mdc && mdc.drawer && drawerEl) {
           const drawer = new mdc.drawer.MDCDrawer(drawerEl);
