@@ -43,17 +43,22 @@
         if (gamesList) {
           try {
             const games = await fetchGames();
+            console.log('Fetched games:', games);
+
             if (Array.isArray(games) && games.length > 0) {
               gamesList.innerHTML = games
                 .map(
                   (game) => `
-                    <div class="mb-4 p-4 rounded shadow bg-white">
-                      <h2 class="text-lg font-bold">${
-                        game.name || 'No Name'
-                      }</h2>
-                      <p>ID: ${game.id || 'N/A'}</p>
-                    </div>
-                  `
+              <div class="mb-4 p-4 rounded shadow bg-white">
+                <h2 class="text-lg font-bold">${game.name || 'No Name'}</h2>
+                <p>ID: ${game.id || 'N/A'}</p>
+                <p>${game.description || ''}</p>
+                <img src="https://ryanstronks.gc-webhosting.nl/api/storage/${game.image_path.replace(
+                  /\\/g,
+                  ''
+                )}" alt="${game.name}" style="max-width:150px;"/>
+              </div>
+            `
                 )
                 .join('');
             } else {
@@ -61,6 +66,7 @@
             }
           } catch (err) {
             gamesList.textContent = 'Failed to load games.';
+            console.error(err);
           }
         }
 
