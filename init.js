@@ -1,3 +1,17 @@
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    console.log('Attempting to register service worker at /service-worker.js');
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((reg) => {
+        console.log('Service worker registered:', reg.scope);
+      })
+      .catch((err) => {
+        console.error('Service worker registration failed:', err);
+      });
+  });
+}
+
 const MDCBanner = mdc.banner.MDCBanner;
 const MDCCheckbox = mdc.checkbox.MDCCheckbox;
 const MDCChip = mdc.chips.MDCChip;
