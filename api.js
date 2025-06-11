@@ -48,5 +48,5 @@ export async function uploadImage(file) {
 
 // Get image URL for a game image
 export function getGameImageUrl(filename) {
-  return `https://ryanstronks.gc-webhosting.nl/api/storage/games/${filename}`;
+  return `https://ryanstronks.gc-webhosting.nl/api/storage/${filename}`;
 }
