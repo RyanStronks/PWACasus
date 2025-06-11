@@ -170,7 +170,13 @@
           }
         });
         document.getElementById('image-modal').onclick = function (e) {
-          if (e.target.id === 'image-modal') hideModal('image-modal');
+          if (
+            e.target.id === 'image-modal' ||
+            (!document.getElementById('modal-image').contains(e.target) &&
+              e.target !== document.getElementById('modal-image'))
+          ) {
+            hideModal('image-modal');
+          }
         };
 
         loadGames();
