@@ -11,13 +11,14 @@
   width: 100vw;
   height: 100vh;
   margin-left: 0;
-  background-color: #2e2e2e;
-  z-index: 1000;
-  overflow-y: auto;
-  transition: 0.3s ease;
   background-color: rgba(46, 46, 46, 0.97);
+  z-index: 2000;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
 .sheet-out-of-view {
-  margin-left: -100%;
+  margin-left: -100vw;
 }
