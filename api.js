@@ -3,8 +3,13 @@ export async function fetchGames() {
   const response = await fetch(
     'https://ryanstronks.gc-webhosting.nl/api/games'
   );
-  if (!response.ok) throw new Error('Failed to fetch games');
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('fetchGames error:', e, 'Response:', text);
+    throw new Error('Failed to fetch games: ' + text);
+  }
 }
 
 // Create a new game
@@ -17,8 +22,13 @@ export async function createGame({ name, description, image_path }) {
       body: JSON.stringify({ name, description, image_path }),
     }
   );
-  if (!response.ok) throw new Error('Failed to create game');
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('createGame error:', e, 'Response:', text);
+    throw new Error('Failed to create game: ' + text);
+  }
 }
 
 // Delete a game by ID
@@ -27,8 +37,13 @@ export async function deleteGame(id) {
     `https://ryanstronks.gc-webhosting.nl/api/games/${id}`,
     { method: 'DELETE' }
   );
-  if (!response.ok) throw new Error('Failed to delete game');
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('deleteGame error:', e, 'Response:', text);
+    throw new Error('Failed to delete game: ' + text);
+  }
 }
 
 // Upload an image, returns { path }
@@ -42,8 +57,13 @@ export async function uploadImage(file) {
       body: formData,
     }
   );
-  if (!response.ok) throw new Error('Image upload failed');
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('uploadImage error:', e, 'Response:', text);
+    throw new Error('Image upload failed: ' + text);
+  }
 }
 
 // Get image URL for a game image
