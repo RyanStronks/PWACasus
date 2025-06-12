@@ -1,3 +1,17 @@
+// Fetch all games
+export async function fetchGames() {
+  const response = await fetch(
+    'https://ryanstronks.gc-webhosting.nl/api/games'
+  );
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('fetchGames error:', e, 'Response:', text);
+    throw new Error('Failed to fetch games: ' + text);
+  }
+}
+
 // Create a new game
 export async function createGame({ name, description, image_path }) {
   const response = await fetch(
@@ -63,4 +77,9 @@ export async function uploadImage(file) {
     console.error('uploadImage JSON error:', e, 'Response:', text);
     throw new Error('Image upload failed: ' + text);
   }
+}
+
+// Get image URL for a game image
+export function getGameImageUrl(filename) {
+  return `https://ryanstronks.gc-webhosting.nl/api/storage/${filename}`;
 }
