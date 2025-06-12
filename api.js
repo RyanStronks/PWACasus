@@ -53,13 +53,12 @@ export async function deleteGame(id) {
 
 export async function uploadImage(file) {
   const formData = new FormData();
-  formData.append('file', file); // or 'image', depending on your backend
+  formData.append('image', file);
 
   const response = await fetch(
     'https://ryanstronks.gc-webhosting.nl/api/upload-image',
     {
       method: 'POST',
-      // Do NOT set headers here!
       body: formData,
     }
   );
