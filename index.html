@@ -212,60 +212,150 @@
 
           // --- Add search logic ---
           const searchInput = document.getElementById('search-input');
+          // Create a container for mini search results
+          let miniResults = document.createElement('div');
+          miniResults.id = 'mini-search-results';
+          miniResults.style.marginTop = '8px';
+          miniResults.style.display = 'flex';
+          miniResults.style.flexWrap = 'wrap';
+          miniResults.style.gap = '8px';
+          // Insert after the search input
+          const searchDialogContent = document.getElementById(
+            'search-dialog-content'
+          );
+          if (
+            searchDialogContent &&
+            !document.getElementById('mini-search-results')
+          ) {
+            searchDialogContent.appendChild(miniResults);
+          }
+
+          function renderMiniResults(results) {
+            miniResults.innerHTML = '';
+            if (!results.length) {
+              miniResults.innerHTML =
+                '<span class="text-zinc-400 text-sm">No matches.</span>';
+              return;
+            }
+            results.forEach((game) => {
+              const tag = document.createElement('a');
+              tag.href = `gamedetail.html?id=${encodeURIComponent(game.id)}`;
+              tag.textContent = game.name;
+              tag.title = game.description || '';
+              tag.className =
+                'inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold hover:bg-purple-200 transition cursor-pointer border border-purple-200';
+              tag.style.textDecoration = 'none';
+              miniResults.appendChild(tag);
+            });
+          }
+
           if (searchInput) {
             searchInput.addEventListener('input', function () {
               const query = searchInput.value.trim().toLowerCase();
+              let filtered = [];
               if (!query) {
-                games = allGames.slice();
+                filtered = [];
               } else {
-                games = allGames.filter(
+                filtered = allGames.filter(
                   (g) =>
                     g.name.toLowerCase().includes(query) ||
                     (g.description &&
                       g.description.toLowerCase().includes(query))
                 );
               }
-              renderGames();
+              renderMiniResults(filtered);
             });
 
             // Optional: Reset search when dialog closes
             dialogEl.addEventListener('MDCDialog:closed', function () {
               searchInput.value = '';
-              games = allGames.slice();
-              renderGames();
+              miniResults.innerHTML = '';
             });
           }
         }
 
         // --- Material drawer ---
         const drawerEl = document.getElementById('app-drawer');
-        if (window.mdc && mdc.drawer && drawerEl) {
-          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
-          const menuBtn = document.querySelector(
-            '.mdc-top-app-bar__navigation-icon'
+        if (window.mdc && mdc.dialog && dialogEl) {
+          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+          const searchTextField = new mdc.textField.MDCTextField(
+            document.querySelector('.mdc-text-field')
           );
-          const listEl = drawerEl.querySelector('.mdc-list');
-          const mainContentEl = document.querySelector('.main-content');
 
-          if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-              drawer.open = true;
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+                renderMiniResults(allGames); // Show all games as tags when modal opens
+              }, 200);
             });
           }
 
-          if (listEl) {
-            listEl.addEventListener('click', (event) => {
-              drawer.open = false;
+          // --- Add search logic ---
+          const searchInput = document.getElementById('search-input');
+          // Create a container for mini search results
+          let miniResults = document.createElement('div');
+          miniResults.id = 'mini-search-results';
+          miniResults.style.marginTop = '8px';
+          miniResults.style.display = 'flex';
+          miniResults.style.flexWrap = 'wrap';
+          miniResults.style.gap = '8px';
+          // Insert after the search input
+          const searchDialogContent = document.getElementById(
+            'search-dialog-content'
+          );
+          if (
+            searchDialogContent &&
+            !document.getElementById('mini-search-results')
+          ) {
+            searchDialogContent.appendChild(miniResults);
+          }
+
+          function renderMiniResults(results) {
+            miniResults.innerHTML = '';
+            if (!results.length) {
+              miniResults.innerHTML =
+                '<span class="text-zinc-400 text-sm">No matches.</span>';
+              return;
+            }
+            results.forEach((game) => {
+              const tag = document.createElement('a');
+              tag.href = `gamedetail.html?id=${encodeURIComponent(game.id)}`;
+              tag.textContent = game.name;
+              tag.title = game.description || '';
+              tag.className =
+                'inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold hover:bg-purple-200 transition cursor-pointer border border-purple-200';
+              tag.style.textDecoration = 'none';
+              miniResults.appendChild(tag);
             });
           }
 
-          drawerEl.addEventListener('MDCDrawer:closed', () => {
-            const focusable = mainContentEl.querySelector(
-              'input, button, [tabindex]:not([tabindex="-1"])'
-            );
-            if (focusable) focusable.focus();
-            else mainContentEl.focus();
-          });
+          if (searchInput) {
+            searchInput.addEventListener('input', function () {
+              const query = searchInput.value.trim().toLowerCase();
+              let filtered = [];
+              if (!query) {
+                filtered = allGames;
+              } else {
+                filtered = allGames.filter(
+                  (g) =>
+                    g.name.toLowerCase().includes(query) ||
+                    (g.description &&
+                      g.description.toLowerCase().includes(query))
+                );
+              }
+              renderMiniResults(filtered);
+            });
+
+            // Reset search when dialog closes
+            dialogEl.addEventListener('MDCDialog:closed', function () {
+              searchInput.value = '';
+              miniResults.innerHTML = '';
+            });
+          }
         }
 
         loadGames();
