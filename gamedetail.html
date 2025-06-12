@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game Detail</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <script type="module">
+      import { fetchGame, getGameImageUrl } from './api.js';
+
+      function getIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+      }
+
+      async function loadGameDetail() {
+        const id = getIdFromUrl();
+        const container = document.getElementById('game-detail');
+        if (!id) {
+          container.innerHTML =
+            '<div class="p-8 text-red-400">No game ID provided.</div>';
+          return;
+        }
+        container.innerHTML =
+          '<div class="p-8 text-center text-zinc-300">Loading...</div>';
+        try {
+          const game = await fetchGame(id);
+          container.innerHTML = `
+            <div class="max-w-lg mx-auto bg-[#1e293b] p-8 rounded-3xl shadow text-zinc-100 mt-10">
+              <a href="index.html" class="text-purple-400 hover:underline flex items-center mb-4">
+                <span class="material-icons mr-2">arrow_back</span> Terug naar overzicht
+              </a>
+              <h1 class="text-3xl font-bold mb-2 text-purple-200">${
+                game.name
+              }</h1>
+              <p class="mb-4 text-zinc-300">${game.description}</p>
+              ${
+                game.image_path
+                  ? `<img src="${getGameImageUrl(game.image_path)}" alt="${
+                      game.name
+                    }" class="max-w-xs mx-auto rounded shadow mb-4" />`
+                  : ''
+              }
+            </div>
+          `;
+        } catch (err) {
+          container.innerHTML = `<div class="p-8 text-red-400">Failed to load game details.</div>`;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', loadGameDetail);
+    </script>
+  </head>
+  <body
+    class="bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] min-h-screen"
+  >
+    <div id="game-detail"></div>
+  </body>
+</html>

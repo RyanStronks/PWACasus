@@ -38,7 +38,6 @@
     <script type="module">
       import {
         fetchGames,
-        fetchGame,
         createGame,
         deleteGame,
         uploadImage,
@@ -177,40 +176,16 @@
           if (e.target.id === 'image-modal') hideModal('image-modal');
         };
 
-        // Game details modal
-        document.addEventListener('click', async function (e) {
+        // Game details: route to gamedetail.html
+        document.addEventListener('click', function (e) {
           const link = e.target.closest('.game-link');
           if (link) {
             const id = link.dataset.id;
-            const modal = document.getElementById('game-detail-modal');
-            const content = document.getElementById('game-detail-content');
-            content.innerHTML =
-              '<div class="p-8 text-center text-zinc-300">Loading...</div>';
-            modal.classList.remove('hidden');
-            try {
-              const game = await fetchGame(id);
-              content.innerHTML = `
-                <h2 class="text-2xl font-bold mb-2 text-purple-200">${
-                  game.name
-                }</h2>
-                <p class="mb-4 text-zinc-300">${game.description}</p>
-                ${
-                  game.image_path
-                    ? `<img src="${getGameImageUrl(game.image_path)}" alt="${
-                        game.name
-                      }" class="max-w-xs mx-auto rounded shadow mb-4" />`
-                    : ''
-                }
-              `;
-            } catch (err) {
-              content.innerHTML = `<div class="p-8 text-red-400">Failed to load game details.</div>`;
-            }
+            window.location.href = `gamedetail.html?id=${encodeURIComponent(
+              id
+            )}`;
           }
         });
-
-        document.getElementById('close-game-detail').onclick = function () {
-          document.getElementById('game-detail-modal').classList.add('hidden');
-        };
 
         // --- Material search dialog ---
         const dialogEl = document.getElementById('search-dialog');
@@ -399,26 +374,6 @@
         <ul id="games-list" class="space-y-4 !pt-6"></ul>
       </div>
     </main>
-
-    <!-- GAME DETAIL MODAL -->
-    <div
-      id="game-detail-modal"
-      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
-    >
-      <div
-        class="bg-[#1e293b] p-8 rounded-3xl text-center w-full max-w-md relative text-zinc-100"
-      >
-        <button
-          id="close-game-detail"
-          class="absolute top-4 right-4 text-xl text-zinc-400 hover:text-zinc-100"
-          aria-label="Close"
-          type="button"
-        >
-          &times;
-        </button>
-        <div id="game-detail-content"></div>
-      </div>
-    </div>
 
     <!-- CREATE MODAL -->
     <div
