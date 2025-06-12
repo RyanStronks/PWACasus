@@ -70,44 +70,35 @@
         list.innerHTML = games
           .map(
             (game) => `
-        <li class="!p-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">        
-          <div class="flex items-center justify-between">
-          <div>
-            <span class="font-semibold text-purple-700 dark:text-purple-400">${
-              game.name
-            }</span>
-            <span class="!ml-2 text-zinc-400">(${game.description})</span>
-            <div class="flex items-center !mt-2 gap-2">
-              ${
-                game.image_path
-                  ? `
-                <img src="${getGameImageUrl(game.image_path)}" 
-                  alt="${game.name}" 
-                  class="h-16 w-auto rounded object-cover cursor-pointer game-image"
-                  data-img="${getGameImageUrl(game.image_path)}"
-                  data-name="${game.name}"
-                />
-              `
-                  : ''
-              }
-              <button 
-                class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl ml-2"
-                data-id="${game.id}"
-                aria-label="View details"
-                title="View details"
-                style="background: none; border: none; cursor: pointer;"
-              >
-                <i class="!pl-6 fa-solid fa-arrow-right"></i>
-              </button>
+      <li class="!p-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            ${
+              game.image_path
+                ? `<img src="${getGameImageUrl(game.image_path)}" 
+                    alt="${game.name}" 
+                    class="h-16 w-auto rounded object-cover cursor-pointer game-image"
+                    data-img="${getGameImageUrl(game.image_path)}"
+                    data-name="${game.name}"
+                  />`
+                : ''
+            }
+            <div>
+              <span class="font-semibold text-purple-700 dark:text-purple-400">${
+                game.name
+              }</span>
+              <span class="!ml-2 text-zinc-400">(${game.description})</span>
             </div>
           </div>
-          <div>
-            <span class="material-icons cursor-pointer text-red-400 hover:text-red-600 delete-btn" data-id="${
-              game.id
-            }" data-name="${game.name}">
-              delete
-            </span>
-          </div>
+          <button 
+            class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl ml-2"
+            data-id="${game.id}"
+            aria-label="View details"
+            title="View details"
+            style="background: none; border: none; cursor: pointer;"
+          >
+            <i class="!pl-6 fa-solid fa-arrow-right"></i>
+          </button>
         </div>
       </li>
     `
