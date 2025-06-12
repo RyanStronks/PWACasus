@@ -9,7 +9,17 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script defer src="./init.js"></script>
     <script type="module">
       import {
         fetchGame,
@@ -64,23 +74,23 @@
           <form id="edit-form" class="space-y-4">
             <div class="flex flex-col md:flex-row gap-6 items-start">
               <div class="flex-1 w-full">
-                <label class="block !mb-1 text-purple-700 dark:text-purple-400">Naam</label>
-                <input class="w-full !p-2 rounded bg-[#0f172a] text-zinc-100" name="name" value="${game.name.replace(
+                <label class="block mb-1 text-purple-700 dark:text-purple-400">Naam</label>
+                <input class="w-full p-2 rounded bg-[#0f172a] text-zinc-100" name="name" value="${game.name.replace(
                   /"/g,
                   '&quot;'
                 )}" required />
-                <label class="block !mb-1 !mt-4 text-purple-700 dark:text-purple-400">Beschrijving</label>
-                <textarea class="w-full !p-2 rounded bg-[#0f172a] text-zinc-100" name="description" required>${
+                <label class="block mb-1 mt-4 text-purple-700 dark:text-purple-400">Beschrijving</label>
+                <textarea class="w-full p-2 rounded bg-[#0f172a] text-zinc-100" name="description" required>${
                   game.description || ''
                 }</textarea>
               </div>
               ${imageHtml}
             </div>
-            <div class="flex gap-2 !mt-4">
-              <button type="submit" class="!px-4 !py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer" ${
+            <div class="flex gap-2 mt-4">
+              <button type="submit" class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer" ${
                 saving ? 'disabled' : ''
               }>Opslaan</button>
-              <button type="button" id="cancel-edit" class="!px-4 !py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer" ${
+              <button type="button" id="cancel-edit" class="px-4 py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer" ${
                 saving ? 'disabled' : ''
               }>Annuleren</button>
             </div>
@@ -90,13 +100,13 @@
         let viewHtml = `
           <div class="flex flex-col md:flex-row gap-6 items-start">
             <div class="flex-1 w-full">
-              <div class="font-semibold text-purple-700 dark:text-purple-400 text-xl !mb-2">${
+              <div class="font-semibold text-purple-700 dark:text-purple-400 text-xl mb-2">${
                 game.name
               }</div>
               <div class="text-zinc-400 mb-2">${game.description || ''}</div>
-              <div class="flex gap-2 !mt-4">
-                <button id="edit-btn" class="!px-4 !py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer">Bewerken</button>
-                <button id="delete-btn" class="!px-4 !py-2 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer">Verwijderen</button>
+              <div class="flex gap-2 mt-4">
+                <button id="edit-btn" class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer">Bewerken</button>
+                <button id="delete-btn" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer">Verwijderen</button>
               </div>
             </div>
             ${imageHtml}
@@ -107,7 +117,7 @@
           <div class="max-w-2xl mx-auto !p-8 rounded-xl shadow-lg bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a192f] text-zinc-100 !mt-10">
             ${errorHtml}
             <a href="index.html" class="text-purple-400 hover:underline flex items-center !mb-6">
-              <span class="material-icons mr-2">arrow_back</span>
+              <span class="material-icons !mr-2">arrow_back</span>
               <span>Terug naar overzicht</span>
             </a>
             <div class="!p-4 rounded-lg bg-[#1e293b] border border-[#22304a] !mb-4">
@@ -229,12 +239,179 @@
         }
       }
 
-      document.addEventListener('DOMContentLoaded', loadGameDetail);
+      // --- Material search dialog and drawer ---
+      document.addEventListener('DOMContentLoaded', function () {
+        // Material search dialog
+        const dialogEl = document.getElementById('search-dialog');
+        if (window.mdc && mdc.dialog && dialogEl) {
+          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+          const searchTextField = new mdc.textField.MDCTextField(
+            document.querySelector('.mdc-text-field')
+          );
+
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+              }, 200);
+            });
+          }
+        }
+
+        // Material drawer
+        const drawerEl = document.getElementById('app-drawer');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+          const menuBtn = document.querySelector(
+            '.mdc-top-app-bar__navigation-icon'
+          );
+          const listEl = drawerEl.querySelector('.mdc-list');
+          const mainContentEl = document.querySelector('.main-content');
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
+
+        loadGameDetail();
+      });
     </script>
   </head>
   <body
     class="bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] min-h-screen"
   >
-    <div id="game-detail"></div>
+    <!-- NAVBAR & DRAWER -->
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <button
+            class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button"
+            aria-label="Open navigation menu"
+          >
+            menu
+          </button>
+          <p class="mdc-top-app-bar__title">Game API</p>
+        </section>
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
+          role="toolbar"
+        >
+          <button
+            class="material-icons mdc-top-app-bar__action-item mdc-icon-button"
+            aria-label="Search"
+            id="search-button"
+            type="button"
+          >
+            search
+          </button>
+          <div class="mdc-dialog" id="search-dialog">
+            <div class="mdc-dialog__container">
+              <div
+                class="mdc-dialog__surface"
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="search-dialog-title"
+                aria-describedby="search-dialog-content"
+              >
+                <div class="mdc-dialog__content" id="search-dialog-content">
+                  <div style="width: 100%; padding: 8px 0">
+                    <label
+                      class="mdc-text-field mdc-text-field--filled"
+                      style="width: 100%"
+                    >
+                      <span class="mdc-text-field__ripple"></span>
+                      <span class="mdc-floating-label" id="search-label"
+                        >Search…</span
+                      >
+                      <input
+                        class="mdc-text-field__input"
+                        type="text"
+                        id="search-input"
+                        aria-labelledby="search-label"
+                        autocomplete="off"
+                      />
+                      <span class="mdc-line-ripple"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mdc-dialog__scrim"></div>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <aside class="mdc-drawer mdc-drawer--modal" id="app-drawer">
+      <div class="mdc-drawer__content">
+        <nav class="mdc-list">
+          <div class="flex item-center justify-center pt-2 pb-4">
+            <img src="./assets/Game API.svg" alt="Image missing." />
+          </div>
+          <a
+            class="mdc-list-item mdc-list-item--activated hover:bg-gray-200"
+            href="index.html"
+            aria-current="page"
+            tabindex="0"
+          >
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
+              >inbox</i
+            >
+            <span class="mdc-list-item__text">Games</span>
+          </a>
+          <a
+            class="mdc-list-item mdc-list-item--activated mt-2 hover:bg-gray-200"
+            href="#"
+            aria-current="page"
+            tabindex="0"
+          >
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
+              >inbox</i
+            >
+            <span class="mdc-list-item__text">Temp</span>
+          </a>
+          <a
+            class="mdc-list-item mdc-list-item--activated mt-2 hover:bg-gray-200"
+            href="#"
+            aria-current="page"
+            tabindex="0"
+          >
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
+              >inbox</i
+            >
+            <span class="mdc-list-item__text">Temp</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+    <div class="mdc-drawer-scrim"></div>
+
+    <main
+      class="main-content min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300 px-2"
+      tabindex="0"
+    >
+      <div id="game-detail"></div>
+    </main>
   </body>
 </html>
