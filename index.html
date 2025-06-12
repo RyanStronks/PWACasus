@@ -38,6 +38,7 @@
     <script type="module">
       import {
         fetchGames,
+        fetchGame,
         createGame,
         deleteGame,
         uploadImage,
@@ -66,7 +67,7 @@
         list.innerHTML = games
           .map(
             (game) => `
-        <li class="p-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">        
+        <li class="!p-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">        
           <div class="flex items-center justify-between">
           <div>
             <span class="font-semibold text-purple-700 dark:text-purple-400 cursor-pointer hover:underline game-link" data-id="${
@@ -74,11 +75,11 @@
             }">
               ${game.name}
             </span>
-            <span class="ml-2 text-zinc-400">(${game.description})</span>
+            <span class="!ml-2 text-zinc-400">(${game.description})</span>
             ${
               game.image_path
                 ? `
-              <div class="mt-2">
+              <div class="!mt-2">
                 <img src="${getGameImageUrl(game.image_path)}" 
                   alt="${game.name}" 
                   class="h-16 w-auto rounded object-cover cursor-pointer game-image"
@@ -112,6 +113,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', function () {
+        // Create modal
         document.getElementById('open-create-modal').onclick = () =>
           showModal('create-modal');
         document.getElementById('cancel-create').onclick = () =>
@@ -141,6 +143,7 @@
           }
         };
 
+        // Delete modal
         document.addEventListener('click', function (e) {
           if (e.target.classList.contains('delete-btn')) {
             gameToDelete = games.find((g) => g.id == e.target.dataset.id);
@@ -162,6 +165,7 @@
           }
         };
 
+        // Image modal
         document.addEventListener('click', function (e) {
           if (e.target.classList.contains('game-image')) {
             document.getElementById('modal-image').src = e.target.dataset.img;
@@ -172,6 +176,102 @@
         document.getElementById('image-modal').onclick = function (e) {
           if (e.target.id === 'image-modal') hideModal('image-modal');
         };
+
+        // Game details sheet
+        document.addEventListener('click', async function (e) {
+          const link = e.target.closest('.game-link');
+          if (link) {
+            const id = link.dataset.id;
+            const sheet = document.getElementById('sheet-game-detail');
+            sheet.innerHTML =
+              '<div class="p-8 text-center text-zinc-300">Loading...</div>';
+            sheet.classList.remove('hidden', 'sheet-out-of-view');
+            try {
+              const game = await fetchGame(id);
+              sheet.innerHTML = `
+          <div class="p-8 relative">
+            <button id="close-sheet" class="absolute top-4 right-4 text-xl text-zinc-400 hover:text-zinc-100" aria-label="Close">&times;</button>
+            <h2 class="text-2xl font-bold mb-2 text-purple-200">${
+              game.name
+            }</h2>
+            <p class="mb-4 text-zinc-300">${game.description}</p>
+            ${
+              game.image_path
+                ? `<img src="${getGameImageUrl(game.image_path)}" alt="${
+                    game.name
+                  }" class="max-w-xs mx-auto rounded shadow mb-4" />`
+                : ''
+            }
+          </div>
+        `;
+            } catch (err) {
+              sheet.innerHTML = `<div class="p-8 text-red-400">Failed to load game details.</div>`;
+            }
+          }
+        });
+
+        // Close sheet logic
+        document
+          .getElementById('sheet-game-detail')
+          .addEventListener('click', function (e) {
+            if (
+              e.target.id === 'close-sheet' ||
+              e.target.id === 'sheet-game-detail'
+            ) {
+              this.classList.add('hidden', 'sheet-out-of-view');
+            }
+          });
+
+        // --- Material search dialog ---
+        const dialogEl = document.getElementById('search-dialog');
+        if (window.mdc && mdc.dialog && dialogEl) {
+          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+          const searchTextField = new mdc.textField.MDCTextField(
+            document.querySelector('.mdc-text-field')
+          );
+
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+              }, 200);
+            });
+          }
+        }
+
+        // --- Material drawer ---
+        const drawerEl = document.getElementById('app-drawer');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+          const menuBtn = document.querySelector(
+            '.mdc-top-app-bar__navigation-icon'
+          );
+          const listEl = drawerEl.querySelector('.mdc-list');
+          const mainContentEl = document.querySelector('.main-content');
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
 
         loadGames();
       });
@@ -294,7 +394,9 @@
         class="w-full max-w-2xl md:max-w-3xl mx-auto p-4 md:p-10 rounded-2xl text-zinc-100 mt-8 md:mt-16"
       >
         <div class="flex flex-col mb-6 gap-4 items-center">
-          <h1 class="text-3xl font-bold text-purple-900 dark:text-purple-600 text-center md:text-left">
+          <h1
+            class="text-3xl font-bold text-purple-900 dark:text-purple-600 text-center md:text-left"
+          >
             Games
           </h1>
           <button
@@ -308,15 +410,20 @@
       </div>
     </main>
 
+    <section
+      class="sheet hidden sheet-out-of-view sheet-game-detail"
+      id="sheet-game-detail"
+    ></section>
+
     <!-- CREATE MODAL -->
     <div
       id="create-modal"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
     >
-      <div
-        class="bg-[#1e293b] !p-6 rounded-3xl text-center w-full max-w-md"
-      >
-        <h2 class="text-xl font-bold text-purple-900 dark:text-purple-600 !mb-2">
+      <div class="bg-[#1e293b] !p-6 rounded-3xl text-center w-full max-w-md">
+        <h2
+          class="text-xl font-bold text-purple-900 dark:text-purple-600 !mb-2"
+        >
           Create Game
         </h2>
         <div id="create-error" class="!mb-2 text-red-400 hidden"></div>
@@ -395,61 +502,11 @@
         class="h-1/3 w-2/3 max-w-full max-h-full rounded mb-4 object-contain"
       />
 
-      <p class="absolute bottom-72 left-0 right-0 text-xs text-zinc-300 text-center pointer-events-none">
+      <p
+        class="absolute bottom-72 left-0 right-0 text-xs text-zinc-300 text-center pointer-events-none"
+      >
         Click outside to close
       </p>
-
-        <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const dialogEl = document.getElementById('search-dialog');
-        if (window.mdc && mdc.dialog && dialogEl) {
-          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
-
-          const searchTextField = new mdc.textField.MDCTextField(
-            document.querySelector('.mdc-text-field')
-          );
-
-          const searchBtn = document.getElementById('search-button');
-          if (searchBtn) {
-            searchBtn.addEventListener('click', function () {
-              searchDialog.open();
-              setTimeout(() => {
-                document.getElementById('search-input').focus();
-              }, 200);
-            });
-          }
-        }
-
-        const drawerEl = document.getElementById('app-drawer');
-        if (window.mdc && mdc.drawer && drawerEl) {
-          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
-          const menuBtn = document.querySelector(
-            '.mdc-top-app-bar__navigation-icon'
-          );
-          const listEl = drawerEl.querySelector('.mdc-list');
-          const mainContentEl = document.querySelector('.main-content');
-
-          if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-              drawer.open = true;
-            });
-          }
-
-          if (listEl) {
-            listEl.addEventListener('click', (event) => {
-              drawer.open = false;
-            });
-          }
-
-          drawerEl.addEventListener('MDCDrawer:closed', () => {
-            const focusable = mainContentEl.querySelector(
-              'input, button, [tabindex]:not([tabindex="-1"])'
-            );
-            if (focusable) focusable.focus();
-            else mainContentEl.focus();
-          });
-        }
-      });
-    </script>
+    </div>
   </body>
 </html>

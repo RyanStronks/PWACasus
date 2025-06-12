@@ -1,3 +1,4 @@
+// Fetch all games from the API
 export async function fetchGames() {
   const response = await fetch(
     'https://ryanstronks.gc-webhosting.nl/api/games'
@@ -8,6 +9,23 @@ export async function fetchGames() {
   } catch (e) {
     console.error('fetchGames error:', e, 'Response:', text);
     throw new Error('Failed to fetch games: ' + text);
+  }
+}
+
+export async function fetchGame(id) {
+  const response = await fetch(
+    `https://ryanstronks.gc-webhosting.nl/api/games/${id}`
+  );
+  const text = await response.text();
+  if (!response.ok) {
+    console.error('fetchGame failed:', response.status, text);
+    throw new Error(`Failed to fetch game (${response.status}): ${text}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('fetchGame JSON error:', e, 'Response:', text);
+    throw new Error('Failed to fetch game: ' + text);
   }
 }
 
@@ -48,6 +66,28 @@ export async function deleteGame(id) {
   } catch (e) {
     console.error('deleteGame JSON error:', e, 'Response:', text);
     throw new Error('Failed to delete game: ' + text);
+  }
+}
+
+export async function updateGame(id, { name, description }) {
+  const response = await fetch(
+    `https://ryanstronks.gc-webhosting.nl/api/games/${id}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description }),
+    }
+  );
+  const text = await response.text();
+  if (!response.ok) {
+    console.error('updateGame failed:', response.status, text);
+    throw new Error(`Failed to update game (${response.status}): ${text}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('updateGame JSON error:', e, 'Response:', text);
+    throw new Error('Failed to update game: ' + text);
   }
 }
 
