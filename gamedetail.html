@@ -30,21 +30,28 @@
         try {
           const game = await fetchGame(id);
           container.innerHTML = `
-            <div class="max-w-lg mx-auto bg-[#1e293b] p-8 rounded-3xl shadow text-zinc-100 mt-10">
-              <a href="index.html" class="text-purple-400 hover:underline flex items-center mb-4">
-                <span class="material-icons mr-2">arrow_back</span> Terug naar overzicht
+            <div class="max-w-2xl mx-auto bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg rounded-3xl p-8 mt-10">
+              <a href="index.html" class="text-purple-400 hover:underline flex items-center mb-6">
+                <span class="material-icons mr-2">arrow_back</span>
+                <span>Terug naar overzicht</span>
               </a>
-              <h1 class="text-3xl font-bold mb-2 text-purple-200">${
-                game.name
-              }</h1>
-              <p class="mb-4 text-zinc-300">${game.description}</p>
-              ${
-                game.image_path
-                  ? `<img src="${getGameImageUrl(game.image_path)}" alt="${
-                      game.name
-                    }" class="max-w-xs mx-auto rounded shadow mb-4" />`
-                  : ''
-              }
+              <div class="flex flex-col md:flex-row items-center gap-8">
+                ${
+                  game.image_path
+                    ? `<img src="${getGameImageUrl(game.image_path)}" alt="${
+                        game.name
+                      }" class="w-48 h-48 object-cover rounded-xl shadow mb-4 md:mb-0" />`
+                    : ''
+                }
+                <div class="flex-1 text-center md:text-left">
+                  <h1 class="text-3xl font-bold mb-2 text-purple-900 dark:text-purple-200">${
+                    game.name
+                  }</h1>
+                  <p class="mb-4 text-zinc-700 dark:text-zinc-300">${
+                    game.description
+                  }</p>
+                </div>
+              </div>
             </div>
           `;
         } catch (err) {
