@@ -1,4 +1,3 @@
-// Fetch all games
 export async function fetchGames() {
   const response = await fetch(
     'https://ryanstronks.gc-webhosting.nl/api/games'
@@ -12,7 +11,6 @@ export async function fetchGames() {
   }
 }
 
-// Create a new game
 export async function createGame({ name, description, image_path }) {
   const response = await fetch(
     'https://ryanstronks.gc-webhosting.nl/api/games',
@@ -35,7 +33,6 @@ export async function createGame({ name, description, image_path }) {
   }
 }
 
-// Delete a game by ID
 export async function deleteGame(id) {
   const response = await fetch(
     `https://ryanstronks.gc-webhosting.nl/api/games/${id}`,
@@ -54,7 +51,6 @@ export async function deleteGame(id) {
   }
 }
 
-// Upload an image, returns { path }
 export async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -62,7 +58,7 @@ export async function uploadImage(file) {
     'https://ryanstronks.gc-webhosting.nl/api/upload-image',
     {
       method: 'POST',
-      // DO NOT set Content-Type here!
+      headers: { 'Content-Type': 'application/json' },
       body: formData,
     }
   );
