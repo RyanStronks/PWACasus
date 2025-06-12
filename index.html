@@ -49,11 +49,13 @@
       } from './api.js';
 
       let games = [];
+      let allGames = []; // <-- Add this line
       let gameToDelete = null;
 
       async function loadGames() {
         try {
           games = await fetchGames();
+          allGames = games.slice(); // <-- Store all games for search
           renderGames();
         } catch {
           document.getElementById('games-list').innerHTML =
@@ -205,6 +207,32 @@
               setTimeout(() => {
                 document.getElementById('search-input').focus();
               }, 200);
+            });
+          }
+
+          // --- Add search logic ---
+          const searchInput = document.getElementById('search-input');
+          if (searchInput) {
+            searchInput.addEventListener('input', function () {
+              const query = searchInput.value.trim().toLowerCase();
+              if (!query) {
+                games = allGames.slice();
+              } else {
+                games = allGames.filter(
+                  (g) =>
+                    g.name.toLowerCase().includes(query) ||
+                    (g.description &&
+                      g.description.toLowerCase().includes(query))
+                );
+              }
+              renderGames();
+            });
+
+            // Optional: Reset search when dialog closes
+            dialogEl.addEventListener('MDCDialog:closed', function () {
+              searchInput.value = '';
+              games = allGames.slice();
+              renderGames();
             });
           }
         }
