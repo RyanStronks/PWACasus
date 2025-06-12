@@ -49,13 +49,13 @@
       } from './api.js';
 
       let games = [];
-      let allGames = []; // <-- Add this line
+      let allGames = [];
       let gameToDelete = null;
 
       async function loadGames() {
         try {
           games = await fetchGames();
-          allGames = games.slice(); // <-- Store all games for search
+          allGames = games.slice();
           renderGames();
         } catch {
           document.getElementById('games-list').innerHTML =
@@ -72,38 +72,38 @@
         list.innerHTML = games
           .map(
             (game) => `
-      <li class="!my-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            ${
-              game.image_path
-                ? `<img src="${getGameImageUrl(game.image_path)}" 
-                    alt="${game.name}" 
-                    class="h-16 w-auto rounded object-cover cursor-pointer game-image"
-                    data-img="${getGameImageUrl(game.image_path)}"
-                    data-name="${game.name}"
-                  />`
-                : ''
-            }
-            <div>
-              <span class="font-semibold text-purple-700 dark:text-purple-400">${
-                game.name
-              }</span>
-              <span class="!ml-2 text-zinc-400">(${game.description})</span>
+        <li class="!my-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              ${
+                game.image_path
+                  ? `<img src="${getGameImageUrl(game.image_path)}"
+                      alt="${game.name}"
+                      class="h-16 w-auto rounded object-cover cursor-pointer game-image"
+                      data-img="${getGameImageUrl(game.image_path)}"
+                      data-name="${game.name}"
+                    />`
+                  : ''
+              }
+              <div>
+                <span class="font-semibold text-purple-700 dark:text-purple-400">${
+                  game.name
+                }</span>
+                <span class="!ml-2 text-zinc-400">(${game.description})</span>
+              </div>
             </div>
+            <button
+              class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl !mr-6"
+              data-id="${game.id}"
+              aria-label="View details"
+              title="View details"
+              style="background: none; border: none; cursor: pointer;"
+            >
+              <i class="!pl-6 fa-solid fa-arrow-right"></i>
+            </button>
           </div>
-          <button 
-            class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl !mr-6"
-            data-id="${game.id}"
-            aria-label="View details"
-            title="View details"
-            style="background: none; border: none; cursor: pointer;"
-          >
-            <i class="!pl-6 fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
-      </li>
-    `
+        </li>
+      `
           )
           .join('');
       }
@@ -276,6 +276,35 @@
 
         // --- Material drawer ---
         const drawerEl = document.getElementById('app-drawer');
+        const menuBtn = document.querySelector(
+          '.mdc-top-app-bar__navigation-icon'
+        );
+        const listEl = drawerEl ? drawerEl.querySelector('.mdc-list') : null;
+        const mainContentEl = document.querySelector('.main-content');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
+
         if (window.mdc && mdc.dialog && dialogEl) {
           const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
 
@@ -376,7 +405,7 @@
             menu
           </button>
           <p
-            class="mdc-top-app-bar__title"
+            class="mdc-top-app-bar__title cursor-pointer"
             onclick="window.location.href='index.html'"
           >
             Game API
