@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="About Game API" />
+    <meta name="msapplication-TileColor" content="#6200ee" />
+    <meta name="theme-color" content="#6200ee" />
+    <link rel="manifest" href="./webmanifest.json" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="./assets/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./assets/apple-touch-icon.png"
+    />
+    <meta name="apple-mobile-web-app-title" content="Game API" />
+    <title>About</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script defer src="./init.js"></script>
+  </head>
+  <body>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <button
+            class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button"
+            aria-label="Open navigation menu"
+          >
+            menu
+          </button>
+          <p
+            class="mdc-top-app-bar__title cursor-pointer"
+            onclick="window.location.href='index.html'"
+          >
+            Game API
+          </p>
+        </section>
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
+          role="toolbar"
+        >
+          <!-- Optionally add search or other actions here -->
+        </section>
+      </div>
+    </header>
+
+    <aside class="mdc-drawer mdc-drawer--modal" id="app-drawer">
+      <div class="mdc-drawer__content">
+        <nav class="mdc-list">
+          <div class="flex item-center justify-center !pt-2 !pb-4">
+            <img src="./assets/Game API.svg" alt="Image missing." />
+          </div>
+          <a
+            class="mdc-list-item hover:bg-gray-200"
+            href="index.html"
+            tabindex="0"
+          >
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
+              >home
+            </i>
+            <span class="mdc-list-item__text">Home</span>
+          </a>
+          <a
+            class="mdc-list-item mdc-list-item--activated !mt-2 hover:bg-gray-200"
+            href="about.html"
+            aria-current="page"
+            tabindex="0"
+          >
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
+              >info
+            </i>
+            <span class="mdc-list-item__text">About</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+    <div class="mdc-drawer-scrim"></div>
+
+    <main
+      class="main-content min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] transition-colors duration-300 px-2"
+      tabindex="0"
+    >
+      <div
+        class="w-full max-w-2xl md:max-w-3xl mx-auto p-4 md:p-10 rounded-2xl text-zinc-100 mt-8 md:mt-16 bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg"
+      >
+        <h1
+          class="text-3xl font-bold text-purple-900 dark:text-purple-600 text-center md:text-left mb-6"
+        >
+          About
+        </h1>
+        <!-- Write your about page content below -->
+        <div class="text-zinc-800 dark:text-zinc-200 text-lg leading-relaxed">
+          <!-- Your text goes here -->
+        </div>
+      </div>
+    </main>
+    <script>
+      // Drawer logic (optional, for menu button)
+      document.addEventListener('DOMContentLoaded', function () {
+        const drawerEl = document.getElementById('app-drawer');
+        const menuBtn = document.querySelector(
+          '.mdc-top-app-bar__navigation-icon'
+        );
+        const listEl = drawerEl ? drawerEl.querySelector('.mdc-list') : null;
+        const mainContentEl = document.querySelector('.main-content');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
