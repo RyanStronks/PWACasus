@@ -40,6 +40,10 @@
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script defer src="./init.js"></script>
     <script type="module">
+      if (!navigator.onLine) {
+        window.location.href = 'offline.html';
+      }
+
       import {
         fetchGames,
         createGame,
