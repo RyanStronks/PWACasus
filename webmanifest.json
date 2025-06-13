@@ -2,7 +2,7 @@
   "name": "Game API",
   "short_name": "API",
   "description": "A simple web application to interact with a game API.",
-  "start_url": ".",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#1a0022",
   "theme_color": "#923CB5",
