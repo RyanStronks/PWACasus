@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="nl">
   <head>
+    <script>
+      if (!navigator.onLine) {
+        window.location.href = 'offline.html';
+      }
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Game API" />
@@ -38,11 +44,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script defer>
-      if (!navigator.onLine) {
-        window.location.href = 'offline.html';
-      }
-    </script>
     <script defer src="./init.js"></script>
     <script type="module">
       import {
