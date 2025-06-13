@@ -31,6 +31,7 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
     />
     <link rel="stylesheet" href="./styles.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link
       rel="stylesheet"
@@ -71,35 +72,38 @@
         list.innerHTML = games
           .map(
             (game) => `
-          <li class="my-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                ${
-                  game.image_path
-                    ? `
-                  <img src="${getGameImageUrl(game.image_path)}"
-                    alt="${game.name}"
-                    class="h-16 w-auto rounded object-cover cursor-pointer game-image"
-                    data-img="${getGameImageUrl(game.image_path)}"
-                    data-name="${game.name}" />`
-                    : ''
-                }
-                <div>
-                  <span class="font-semibold text-purple-700 dark:text-purple-400">${
-                    game.name
-                  }</span>
-                  <span class="ml-2 text-zinc-400">(${game.description})</span>
-                </div>
+        <li class="!my-4 rounded-lg bg-gradient-to-bl from-white/30 via-white/10 to-purple-200/20 backdrop-blur-md shadow-lg hover:from-white/40 hover:to-purple-200/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              ${
+                game.image_path
+                  ? `<img src="${getGameImageUrl(game.image_path)}"
+                      alt="${game.name}"
+                      class="h-16 w-auto rounded object-cover cursor-pointer game-image"
+                      data-img="${getGameImageUrl(game.image_path)}"
+                      data-name="${game.name}"
+                    />`
+                  : ''
+              }
+              <div>
+                <span class="font-semibold text-purple-700 dark:text-purple-400">${
+                  game.name
+                }</span>
+                <span class="!ml-2 text-zinc-400">(${game.description})</span>
               </div>
-              <button class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl mr-6"
-                data-id="${
-                  game.id
-                }" aria-label="View details" title="View details" style="background: none; border: none; cursor: pointer;">
-                <i class="pl-6 fa-solid fa-arrow-right"></i>
-              </button>
             </div>
-          </li>
-        `
+            <button
+              class="game-detail-arrow text-purple-700 dark:text-purple-400 hover:text-purple-900 transition text-xl !mr-6"
+              data-id="${game.id}"
+              aria-label="View details"
+              title="View details"
+              style="background: none; border: none; cursor: pointer;"
+            >
+              <i class="!pl-6 fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </li>
+      `
           )
           .join('');
       }
@@ -123,6 +127,7 @@
           const name = form.name.value.trim();
           const description = form.description.value.trim();
           const image = form.image.files[0];
+
           document.getElementById('create-error').classList.add('hidden');
           try {
             let imagePath = '';
@@ -175,7 +180,7 @@
           if (e.target.id === 'image-modal') hideModal('image-modal');
         };
 
-        // Game details
+        // Game details: route to gamedetail.html
         document.addEventListener('click', function (e) {
           const arrow = e.target.closest('.game-detail-arrow');
           if (arrow) {
@@ -186,27 +191,155 @@
           }
         });
 
-        // Search dialog
+        // --- Material search dialog ---
         const dialogEl = document.getElementById('search-dialog');
         if (window.mdc && mdc.dialog && dialogEl) {
           const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
-          new mdc.textField.MDCTextField(
+
+          const searchTextField = new mdc.textField.MDCTextField(
             document.querySelector('.mdc-text-field')
           );
-          const searchBtn = document.getElementById('search-button');
-          const searchInput = document.getElementById('search-input');
-          const searchDialogContent = document.getElementById(
-            'search-dialog-content'
-          );
 
-          // Mini results for search
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+              }, 200);
+            });
+          }
+
+          // --- Add search logic ---
+          const searchInput = document.getElementById('search-input');
+          // Create a container for mini search results
           let miniResults = document.createElement('div');
           miniResults.id = 'mini-search-results';
           miniResults.style.marginTop = '8px';
           miniResults.style.display = 'flex';
           miniResults.style.flexWrap = 'wrap';
           miniResults.style.gap = '8px';
-          if (!document.getElementById('mini-search-results')) {
+          // Insert after the search input
+          const searchDialogContent = document.getElementById(
+            'search-dialog-content'
+          );
+          if (
+            searchDialogContent &&
+            !document.getElementById('mini-search-results')
+          ) {
+            searchDialogContent.appendChild(miniResults);
+          }
+
+          function renderMiniResults(results) {
+            miniResults.innerHTML = '';
+            if (!results.length) {
+              miniResults.innerHTML =
+                '<span class="text-zinc-400 text-sm">No matches.</span>';
+              return;
+            }
+            results.forEach((game) => {
+              const tag = document.createElement('a');
+              tag.href = `gamedetail.html?id=${encodeURIComponent(game.id)}`;
+              tag.textContent = game.name;
+              tag.title = game.description || '';
+              tag.className =
+                'inline-block !px-3 !py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold hover:bg-purple-200 transition cursor-pointer border border-purple-200';
+              tag.style.textDecoration = 'none';
+              miniResults.appendChild(tag);
+            });
+          }
+
+          if (searchInput) {
+            searchInput.addEventListener('input', function () {
+              const query = searchInput.value.trim().toLowerCase();
+              let filtered = [];
+              if (!query) {
+                filtered = [];
+              } else {
+                filtered = allGames.filter(
+                  (g) =>
+                    g.name.toLowerCase().includes(query) ||
+                    (g.description &&
+                      g.description.toLowerCase().includes(query))
+                );
+              }
+              renderMiniResults(filtered);
+            });
+
+            // Optional: Reset search when dialog closes
+            dialogEl.addEventListener('MDCDialog:closed', function () {
+              searchInput.value = '';
+              miniResults.innerHTML = '';
+            });
+          }
+        }
+
+        // --- Material drawer ---
+        const drawerEl = document.getElementById('app-drawer');
+        const menuBtn = document.querySelector(
+          '.mdc-top-app-bar__navigation-icon'
+        );
+        const listEl = drawerEl ? drawerEl.querySelector('.mdc-list') : null;
+        const mainContentEl = document.querySelector('.main-content');
+        if (window.mdc && mdc.drawer && drawerEl) {
+          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
+
+          if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+              drawer.open = true;
+            });
+          }
+
+          if (listEl) {
+            listEl.addEventListener('click', (event) => {
+              drawer.open = false;
+            });
+          }
+
+          drawerEl.addEventListener('MDCDrawer:closed', () => {
+            const focusable = mainContentEl.querySelector(
+              'input, button, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable) focusable.focus();
+            else mainContentEl.focus();
+          });
+        }
+
+        if (window.mdc && mdc.dialog && dialogEl) {
+          const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
+
+          const searchTextField = new mdc.textField.MDCTextField(
+            document.querySelector('.mdc-text-field')
+          );
+
+          const searchBtn = document.getElementById('search-button');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+              searchDialog.open();
+              setTimeout(() => {
+                document.getElementById('search-input').focus();
+                renderMiniResults(allGames); // Show all games as tags when modal opens
+              }, 200);
+            });
+          }
+
+          // --- Add search logic ---
+          const searchInput = document.getElementById('search-input');
+          // Create a container for mini search results
+          let miniResults = document.createElement('div');
+          miniResults.id = 'mini-search-results';
+          miniResults.style.marginTop = '8px';
+          miniResults.style.display = 'flex';
+          miniResults.style.flexWrap = 'wrap';
+          miniResults.style.gap = '8px';
+          // Insert after the search input
+          const searchDialogContent = document.getElementById(
+            'search-dialog-content'
+          );
+          if (
+            searchDialogContent &&
+            !document.getElementById('mini-search-results')
+          ) {
             searchDialogContent.appendChild(miniResults);
           }
 
@@ -229,28 +362,24 @@
             });
           }
 
-          if (searchBtn) {
-            searchBtn.addEventListener('click', function () {
-              searchDialog.open();
-              setTimeout(() => {
-                searchInput.focus();
-                renderMiniResults(allGames);
-              }, 200);
-            });
-          }
           if (searchInput) {
             searchInput.addEventListener('input', function () {
               const query = searchInput.value.trim().toLowerCase();
-              const filtered = !query
-                ? allGames
-                : allGames.filter(
-                    (g) =>
-                      g.name.toLowerCase().includes(query) ||
-                      (g.description &&
-                        g.description.toLowerCase().includes(query))
-                  );
+              let filtered = [];
+              if (!query) {
+                filtered = allGames;
+              } else {
+                filtered = allGames.filter(
+                  (g) =>
+                    g.name.toLowerCase().includes(query) ||
+                    (g.description &&
+                      g.description.toLowerCase().includes(query))
+                );
+              }
               renderMiniResults(filtered);
             });
+
+            // Reset search when dialog closes
             dialogEl.addEventListener('MDCDialog:closed', function () {
               searchInput.value = '';
               miniResults.innerHTML = '';
@@ -258,36 +387,11 @@
           }
         }
 
-        // Side drawer
-        const drawerEl = document.getElementById('app-drawer');
-        const menuBtn = document.querySelector(
-          '.mdc-top-app-bar__navigation-icon'
-        );
-        const listEl = drawerEl ? drawerEl.querySelector('.mdc-list') : null;
-        const mainContentEl = document.querySelector('.main-content');
-        if (window.mdc && mdc.drawer && drawerEl) {
-          const drawer = new mdc.drawer.MDCDrawer(drawerEl);
-          if (menuBtn)
-            menuBtn.addEventListener('click', () => {
-              drawer.open = true;
-            });
-          if (listEl)
-            listEl.addEventListener('click', () => {
-              drawer.open = false;
-            });
-          drawerEl.addEventListener('MDCDrawer:closed', () => {
-            const focusable = mainContentEl.querySelector(
-              'input, button, [tabindex]:not([tabindex="-1"])'
-            );
-            if (focusable) focusable.focus();
-            else mainContentEl.focus();
-          });
-        }
-
         loadGames();
       });
     </script>
   </head>
+
   <body>
     <header class="mdc-top-app-bar">
       <div class="mdc-top-app-bar__row">
@@ -360,7 +464,7 @@
     <aside class="mdc-drawer mdc-drawer--modal" id="app-drawer">
       <div class="mdc-drawer__content">
         <nav class="mdc-list">
-          <div class="flex item-center justify-center pt-2 pb-4">
+          <div class="flex item-center justify-center !pt-2 !pb-4">
             <img src="./assets/Game API.svg" alt="Image missing." />
           </div>
           <a
@@ -370,19 +474,19 @@
             tabindex="0"
           >
             <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
-              >home</i
-            >
+              >home
+            </i>
             <span class="mdc-list-item__text">Home</span>
           </a>
           <a
-            class="mdc-list-item mdc-list-item--activated mt-2 hover:bg-gray-200"
+            class="mdc-list-item mdc-list-item--activated !mt-2 hover:bg-gray-200"
             href="about.html"
             aria-current="page"
             tabindex="0"
           >
             <i class="material-icons mdc-list-item__graphic" aria-hidden="true"
-              >info</i
-            >
+              >info
+            </i>
             <span class="mdc-list-item__text">About</span>
           </a>
         </nav>
@@ -405,12 +509,12 @@
           </h1>
           <button
             id="open-create-modal"
-            class="px-4 py-2 rounded-lg bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer w-9/10 md:w-full transition"
+            class="!px-4 !py-2 rounded-lg bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer w-9/10 md:w-full transition"
           >
             + Create Game
           </button>
         </div>
-        <ul id="games-list" class="space-y-4 pt-6"></ul>
+        <ul id="games-list" class="space-y-4 !pt-6"></ul>
       </div>
     </main>
 
@@ -419,20 +523,22 @@
       id="create-modal"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
     >
-      <div class="bg-[#1e293b] p-6 rounded-3xl text-center w-full max-w-md">
-        <h2 class="text-xl font-bold text-purple-900 dark:text-purple-600 mb-2">
+      <div class="bg-[#1e293b] !p-6 rounded-3xl text-center w-full max-w-md">
+        <h2
+          class="text-xl font-bold text-purple-900 dark:text-purple-600 !mb-2"
+        >
           Create Game
         </h2>
-        <div id="create-error" class="mb-2 text-red-400 hidden"></div>
-        <form id="create-form" class="space-y-4">
+        <div id="create-error" class="!mb-2 text-red-400 hidden"></div>
+        <form id="create-form" class="!space-y-4">
           <input
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            class="w-full !px-4 !py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
             placeholder="Name"
             name="name"
             required
           />
           <input
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            class="w-full !px-4 !py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
             placeholder="Description"
             name="description"
             required
@@ -441,19 +547,19 @@
             type="file"
             accept="image/*"
             name="image"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            class="w-full !px-4 !py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
           />
-          <div class="flex justify-center gap-4 my-2">
+          <div class="flex justify-center gap-4 !my-2">
             <button
               type="submit"
-              class="px-4 py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer"
+              class="!px-4 !py-2 rounded bg-purple-700 dark:bg-purple-500 text-white hover:bg-purple-800 cursor-pointer"
             >
               Create
             </button>
             <button
               type="button"
               id="cancel-create"
-              class="px-4 py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer"
+              class="!px-4 !py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer"
             >
               Cancel
             </button>
@@ -467,22 +573,22 @@
       id="delete-modal"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden"
     >
-      <div class="bg-[#1e293b] p-6 rounded-3xl text-center w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-blue-200">Are you sure?</h2>
-        <p class="mb-6 text-zinc-300">
+      <div class="bg-[#1e293b] !p-6 rounded-3xl text-center w-full max-w-md">
+        <h2 class="text-xl font-bold !mb-4 text-blue-200">Are you sure?</h2>
+        <p class="!mb-6 text-zinc-300">
           Do you really want to delete
           <span id="delete-game-name" class="font-semibold"></span>?
         </p>
         <div class="flex justify-center gap-4">
           <button
             id="confirm-delete"
-            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+            class="!px-4 !py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
           >
             Yes, Delete
           </button>
           <button
             id="cancel-delete"
-            class="px-4 py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer"
+            class="!px-4 !py-2 rounded bg-zinc-500 text-white hover:bg-zinc-600 cursor-pointer"
           >
             Cancel
           </button>
@@ -490,7 +596,6 @@
       </div>
     </div>
 
-    <!-- IMAGE MODAL -->
     <div
       id="image-modal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden"
@@ -499,6 +604,7 @@
         id="modal-image"
         class="h-1/3 w-2/3 max-w-full max-h-full rounded mb-4 object-contain"
       />
+
       <p
         class="absolute bottom-72 left-0 right-0 text-xs text-zinc-300 text-center pointer-events-none"
       >
