@@ -238,9 +238,7 @@
         }
       }
 
-      // --- Remove search dialog and related logic ---
       document.addEventListener('DOMContentLoaded', function () {
-        // Only drawer logic remains
         const drawerEl = document.getElementById('app-drawer');
         if (window.mdc && mdc.drawer && drawerEl) {
           const drawer = new mdc.drawer.MDCDrawer(drawerEl);
@@ -278,7 +276,6 @@
   <body
     class="bg-gradient-to-b from-white to-purple-100 dark:from-black dark:to-[#923CB5] min-h-screen"
   >
-    <!-- NAVBAR & DRAWER -->
     <header class="mdc-top-app-bar">
       <div class="mdc-top-app-bar__row">
         <section

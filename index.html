@@ -180,7 +180,7 @@
           if (e.target.id === 'image-modal') hideModal('image-modal');
         };
 
-        // Game details: route to gamedetail.html
+        // Game details
         document.addEventListener('click', function (e) {
           const arrow = e.target.closest('.game-detail-arrow');
           if (arrow) {
@@ -191,7 +191,7 @@
           }
         });
 
-        // --- Material search dialog ---
+        // Search
         const dialogEl = document.getElementById('search-dialog');
         if (window.mdc && mdc.dialog && dialogEl) {
           const searchDialog = new mdc.dialog.MDCDialog(dialogEl);
@@ -210,7 +210,6 @@
             });
           }
 
-          // --- Add search logic ---
           const searchInput = document.getElementById('search-input');
           // Create a container for mini search results
           let miniResults = document.createElement('div');
@@ -266,7 +265,6 @@
               renderMiniResults(filtered);
             });
 
-            // Optional: Reset search when dialog closes
             dialogEl.addEventListener('MDCDialog:closed', function () {
               searchInput.value = '';
               miniResults.innerHTML = '';
@@ -274,7 +272,7 @@
           }
         }
 
-        // --- Material drawer ---
+        // Aside drawer
         const drawerEl = document.getElementById('app-drawer');
         const menuBtn = document.querySelector(
           '.mdc-top-app-bar__navigation-icon'
@@ -318,12 +316,11 @@
               searchDialog.open();
               setTimeout(() => {
                 document.getElementById('search-input').focus();
-                renderMiniResults(allGames); // Show all games as tags when modal opens
+                renderMiniResults(allGames);
               }, 200);
             });
           }
 
-          // --- Add search logic ---
           const searchInput = document.getElementById('search-input');
           // Create a container for mini search results
           let miniResults = document.createElement('div');
@@ -332,7 +329,7 @@
           miniResults.style.display = 'flex';
           miniResults.style.flexWrap = 'wrap';
           miniResults.style.gap = '8px';
-          // Insert after the search input
+
           const searchDialogContent = document.getElementById(
             'search-dialog-content'
           );
